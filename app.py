@@ -58,9 +58,11 @@ async def join_room(sid, data):
 
 
 @sio.on("leave")
-async def leave_room(sid):
-    room_id = await sio.get_session(sid, "room_id")
-    sio.leave_room(sid, room_id)
+async def leave_room(sid, data):
+    sio.leave_room(sid, data['room'])
+    async with sio.session(sid) as session:
+        session['room_id'] = 0
+
     await sio.emit('disconnect')
 
 
@@ -81,7 +83,6 @@ def my_event(sid, data):
 
 @sio.event
 async def my_room_event(sid, data):
-    # session['receive_count'] = session.get('receive_count', 0) + 1
     receive_count = 0
     async with sio.session(sid) as session:
         session['receive_count'] += 1
@@ -94,4 +95,4 @@ async def my_room_event(sid, data):
 app.router.add_get('/', index)
 
 if __name__ == '__main__':
-    web.run_app(app, host='localhost', port=5000)
+    web.run_app(app, host='0.0.0.0', port=5000)
