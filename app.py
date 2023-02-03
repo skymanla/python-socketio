@@ -3,7 +3,7 @@ import socketio
 
 # cors_allowed_origins -> cors 정책
 # async_mode -> 비동기처리방법설정
-sio = socketio.AsyncServer(cors_allowed_origins='*')
+sio = socketio.AsyncServer(cors_allowed_origins='*', logger=True)
 app = web.Application()
 sio.attach(app)
 
