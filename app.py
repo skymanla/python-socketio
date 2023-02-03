@@ -26,7 +26,7 @@ def background_thread():
 @sio.event
 async def connect(sid, environ):
     """Default session save"""
-    await sio.save_session(sid, {"receive_count": 0, "room_id": ""})
+    await sio.save_session(sid, {"receive_count": 0, "room_id": 0})
     print("connect ", sid)
 
 
@@ -48,13 +48,20 @@ def message(sid, data):
 
 @sio.on("join")
 async def join_room(sid, data):
-    print("join_room: ", data)
     sio.enter_room(sid, data['room'])
 
     async with sio.session(sid) as session:
         session['receive_count'] += 1
+        session['room_id'] = data['room']
 
     await sio.emit('my_response', {'data': 'In rooms: ' + ', '.join(sio.rooms(sid)), 'count': 0})
+
+
+@sio.on("leave")
+async def leave_room(sid):
+    room_id = await sio.get_session(sid, "room_id")
+    sio.leave_room(sid, room_id)
+    await sio.emit('disconnect')
 
 
 @sio.event
@@ -81,8 +88,7 @@ async def my_room_event(sid, data):
         receive_count = session['receive_count']
 
     print(await sio.get_session(sid))
-    await sio.emit('my_response',
-         {'data': data['data'], 'count': receive_count + 1}, to=data['room'])
+    await sio.emit('my_response', {'data': data['data'], 'count': receive_count + 1}, to=data['room'])
 
 
 app.router.add_get('/', index)
