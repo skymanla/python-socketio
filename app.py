@@ -95,4 +95,4 @@ async def my_room_event(sid, data):
 app.router.add_get('/', index)
 
 if __name__ == '__main__':
-    web.run_app(app, host='0.0.0.0', port=50000)
+    web.run_app(app, host='localhost', port=50000)
